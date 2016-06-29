@@ -1,0 +1,461 @@
+---
+title: "Adabag - An R package for Classification with Boosting and Bagging"
+output: 
+  beamer_presentation: 
+    colortheme: dolphin
+    fonttheme: professionalfonts
+    incremental: yes
+    keep_tex: yes
+    theme: Singapore
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = NULL, cache = TRUE, 
+                      message = FALSE, autodep = TRUE)
+```
+
+## Group Members
+
+**Member Names** | **Roll Numbers**
+-------------|-------------
+Naimish Agarwal | IRM2013013
+Adrish Banerjee | IRM2013014
+Akash Dubey | IIT2013141
+Abhishek Vijayan | IIT2013166
+Shubham Nanda | IIT2013208
+Sanjeev S Nair | IIT2013212
+
+## Project Aim
+
+**Reproducible Research** for the paper:   
+
+> *Esteban Alfaro, Matiaz Gamez, Noelia Garcia (August 2013). 
+  "adabag: An R package for Classification with Boosting and Bagging" 
+  Journal of Statistical Software, Volume 54, Issue 2*
+
+## Technologies Deployed
+
+We have used the following technologies for **Reproducible Research**:
+
+* R - The Language for Statisticians by Statisticians
+* `adabag` - An R package for Classification with Boosting and Bagging
+* `rmarkdown` - An R package which provides markdown for Reproducible Research in R
+* `knitr` - An R package used alongside `rmarkdown`
+* RStudio IDE - The favorite IDE of R programmers
+
+## Algorithms Implemented in `adabag`
+
+Ensemble algorithms for *multi-class classification*:
+
+* Adaboost.M1
+* SAMME
+* Bagging
+
+
+## Ensemble of Trees for Classification
+
+**Ensemble methods** use multiple learning algorithms to obtain better predictive performance than could be obtained from any of the constituent learning algorithms. 
+
+**Boosting** and **Bagging** are two of the most popular methods for ensemble of trees. 
+
+*Their common goal is to improve the accuracy of the ensemble, combining single classifiers which are as precise and different as possible. In both cases, heterogeneity is introduced by modifying the training set where the individual classifiers are built.*
+
+## Boosting vs Bagging
+
+* Boosting constructs its base classifiers in sequence, updating a distribution over the training examples to create each base classifier.
+
+* Bagging combines the individual classifiers in bootstrap replicates of the training set.
+
+## Boosting vs Bagging (contd.)
+
+* In boosting, the base classifier of each boosting iteration depends on all the previous ones through the weight updating process.
+
+* In bagging, they are independent.
+
+## Boosting vs Bagging (contd.)
+
+* Boosting uses a weighted majority vote.
+
+* Bagging uses a simple majority vote.
+
+## Dataset Description
+
+* Training Set ${T}_{n}=\left\{\left({x}_{1},{y}_{1}\right),\dots ,\left({x}_{i},{y}_{i}\right),\dots ,\left({x}_{n},{y}_{n}\right)\right\}$
+
+* Classes ${y}_{i}=1,2,\dots ,k$
+
+## Adaboost.M1 Algorithm
+
+* Start with ${w}_{b}\left(i\right)=\frac{1}{n},i=1,2,\dots ,n$
+* Repeat for $b=1,2,\dots ,B$
+    + Fit the classifier ${C}_{b}\left({x}_{i}\right)=\left\{1,2,\dots ,k\right\}$ using weights ${w}_{b}\left(i\right)$ on ${T}_{b}$
+    + Compute ${e}_{b}=\sum _{i=1}^{n}{w}_{b}\left(i\right)I\left({C}_{b}\left({x}_{i}\right)\ne {y}_{i}\right)$ and ${\alpha }_{b}=\frac{1}{2}\mathrm{ln}\left(\frac{1-{e}_{b}}{{e}_{b}}\right)$
+    + Update the weights ${w}_{b+1}\left(i\right)={w}_{b}\left(i\right){e}^{\left({\alpha }_{b}I\left({C}_{b}\left({x}_{i}\right)\ne {y}_{i}\right)\right)}$ and normalize them
+* Output the classifier ${C}_{f}\left({x}_{i}\right)=\mathrm{arg}\underset{j\in Y}{\mathrm{max}}\sum _{b=1}^{B}\left({\alpha }_{b}I\left({C}_{b}\left({x}_{i}\right)=j\right)\right)$
+
+## SAMME Algorithm
+
+* Start with ${w}_{b}\left(i\right)=\frac{1}{n},i=1,2,\dots ,n$
+* Repeat for $b=1,2,\dots ,B$
+    + Fit the classifier ${C}_{b}\left({x}_{i}\right)=\left\{1,2,\dots ,k\right\}$ using weights ${w}_{b}\left(i\right)$ on ${T}_{b}$
+    + Compute ${e}_{b}=\sum _{i=1}^{n}{w}_{b}\left(i\right)I\left({C}_{b}\left({x}_{i}\right)\ne {y}_{i}\right)$ and ${\alpha }_{b}=\mathrm{ln}\left(\frac{1-{e}_{b}}{b}\right)+\mathrm{ln}\left(k-1\right)$
+    + Update the weights ${w}_{b+1}\left(i\right)={w}_{b}\left(i\right){e}^{\left({\alpha }_{b}I\left({C}_{b}\left({x}_{i}\right)\ne {y}_{i}\right)\right)}$ and normalize them
+* Output the classifier ${C}_{f}\left({x}_{i}\right)=\mathrm{arg}\underset{j\in Y}{\mathrm{max}}\sum _{b=1}^{B}\left({\alpha }_{b}I\left({C}_{b}\left({x}_{i}\right)=j\right)\right)$
+
+
+## Concept of Margins
+
+* The margin for an object is intuitively related to the certainty of its classification and is calculated as the difference between the support of the correct class and the maximum support of an incorrect class.
+
+* For ${k}$ classes, the margin of an example ${x}_{i}$, is calculated using the votes for every class ${j}$ in the final ensemble, which are known as the degree of support of the different classes or posterior probabilities ${\mu }_{j}\left({x}_{i}\right),j=1,2,\dots ,k$ as $m\left({x}_{i}\right)={\mu }_{c}\left({x}_{i}\right)-\underset{j\ne c}{\mathrm{max}}{\mu }_{j}\left({x}_{i}\right)$ where ${c}$ is the correct class of ${x}_{i}$ and $\sum _{j=1}^{k}{\mu }_{j}\left({x}_{i}\right)=1$
+
+## Concept of Margins (contd.)
+
+* All the wrongly classified examples have negative margins and those correctly classified have positive margins.
+
+* Correctly classified observations with a high degree of confidence will have margins close to one. 
+
+* Examples with an uncertain classification will have small margins, that is to say, margins close to zero. 
+
+* Since a small margin is an instability symptom in the assigned class, the same example could be assigned to different classes by similar classifiers.
+
+## Bootstrap Sampling
+
+* Bootstrap samples are obtained by drawing with replacement the same number of elements than the original set (${n}$ in our case).
+
+* In some of the boostrap samples, the presence of noisy observations may be eliminated or at least reduced, (as there is a lower proportion of noisy than non-noisy examples) so the classifiers built in these sets will have a better behavior than the classifier built in the original set. 
+
+* Bagging can be really useful to build a better classifier when there are noisy observations in the training set.
+
+## Bagging Algorithm
+
+* Repeat for $b=1,2,\dots ,B$
+    + Take a bootstrap replicate ${T}_{b}$ for the training set ${T}_{n}$
+    + Construct a single classifier ${C}_{b}\left({x}_{i}\right)=\left\{1,2,\dots ,k\right\}$ in ${T}_{b}$
+* Combine the basic classifiers ${C}_{b}\left({x}_{i}\right)$ by the majority vote (the most often predicted class) to the final decision rule ${C}_{f}\left({x}_{i}\right)=\mathrm{arg}\underset{j\in Y}{\mathrm{max}}\sum _{b=1}^{B}\left(I\left({C}_{b}\left({x}_{i}\right)=j\right)\right)$
+
+## Internals of `adabag`
+
+* `adabag` uses Classification and Regression Trees (CART) as base classifiers using the `rpart` R package.
+
+* Other packages `adabag` relies on are `caret` and `mlbench`.
+
+* It consists of a total of eight functions, three for each method and the `margins` and `evolerror`. 
+
+* The three functions for each method are: 
+
+    + one to build the boosting (or bagging) classifier and classify the samples in the training set
+    + one which can predict the class of new samples using the previously trained ensemble
+    + one which can estimate by cross validation the accuracy of these classifiers in a data set. 
+    
+* Finally, the margin in the class prediction for each observation and the error evolution can be calculated.
+
+## Adaboost on Iris Dataset
+
+```{r, echo=FALSE}
+# load adabag library
+
+library("adabag")
+library("rpart")
+
+# load iris dataset
+
+data("iris")
+
+# training dataset
+
+train.index <- c(sample(1:50, 25), 
+                 sample(51:100, 25), 
+                 sample(100:150, 25))
+iris.train <- iris[train.index, ]
+
+# train adaboost model
+
+iris.adaboost <- boosting(formula = Species ~ ., 
+                          data = iris.train, 
+                          mfinal = 10,
+                          control = rpart.control(maxdepth = 1))
+
+```
+
+```{r, echo=FALSE}
+
+# plotting barplot of relative importance of training features
+
+barplot(iris.adaboost$importance[order(iris.adaboost$importance, 
+                                       decreasing = TRUE)],
+        ylim = c(0, 100),
+        main = "Variables Relative Importance",
+        col = "lightblue")
+
+
+```
+
+
+
+## Adaboost on Iris Dataset (contd.)
+
+**Confusion Matrix** for training dataset:
+
+```{r, echo=FALSE}
+
+# print the confusion matrix
+
+print(table(iris.adaboost$class, 
+            iris.train[, "Species"],
+            dnn = c("Predicted Class",
+                    "Observed Class")))
+
+```
+
+**Mis-classification Error** using 0-1 loss function for training dataset:
+
+```{r, echo=FALSE}
+
+# print misclassification error
+
+iris.adaboost.me = 1 - sum(iris.adaboost$class == iris.train$Species) / length(iris.train$Species)
+
+print(iris.adaboost.me)
+
+```
+
+## Adaboost on Iris Dataset (contd.)
+
+```{r, echo=FALSE}
+
+# get test data
+
+iris.test <- iris[-train.index, ]
+
+# predict on new test examples
+
+iris.adaboost.predict <- predict.boosting(iris.adaboost,
+                                          iris.test)
+
+```
+
+**Confusion Matrix** for testing dataset:
+
+```{r, echo=FALSE}
+
+# print the confusion matrix
+
+print(iris.adaboost.predict$confusion)
+
+```
+
+**Mis-classification Error** using 0-1 loss function for testing dataset:
+
+```{r, echo=FALSE}
+
+# print misclassification error
+
+print(iris.adaboost.predict$error)
+
+```
+
+
+## v-Fold Cross Validation
+
+* Divide the data into v non-overlapping subsets of roughly equal size. 
+
+* Apply the model on (v - 1) of the subsets. 
+
+* Make predictions for the left out subset.
+
+* Repeat the process for each one of the v subsets.
+
+
+## Adaboost on Iris Dataset (contd.)
+
+
+```{r, echo=FALSE, results="hide"}
+
+# apply 10-fold cross-validation on adaboost model
+
+iris.adaboost.cv <- boosting.cv(formula = Species ~ .,
+                                v = 10,
+                                data = iris,
+                                mfinal = 10,
+                                control = rpart.control(maxdepth = 1))
+
+```
+
+**Confusion Matrix** for 10-Fold Cross-Validation:
+
+```{r, echo=FALSE}
+
+# print the confusion matrix
+
+print(iris.adaboost.cv$confusion)
+
+```
+
+**Mis-classification Error** using 0-1 loss for 10-Fold Cross-Validation:
+
+```{r, echo=FALSE}
+
+# print misclassification error
+
+print(iris.adaboost.cv$error)
+
+```
+
+## Bagging on Iris Dataset
+
+```{r, echo=FALSE}
+
+# train bagging model
+
+iris.bagging <- bagging(Species ~ ., 
+                        data = iris.train,
+                        mfinal = 10,
+                        control = rpart.control(maxdepth = 1))
+
+
+```
+
+
+```{r, echo=FALSE}
+
+# barplot of relative importance of variables
+
+barplot(iris.bagging$importance[order(iris.bagging$importance, 
+                                      decreasing = TRUE)],
+        ylim = c(0, 100),
+        main = "Variables of Relative Importance",
+        col = "lightblue")
+
+```
+
+
+## Bagging on Iris Dataset (contd.)
+
+**Confusion Matrix** for training dataset: 
+
+```{r, echo=FALSE}
+
+# confusion matrix
+
+print(table(iris.bagging$class,
+            iris.train$Species,
+            dnn = c("Predicted Class", "Observed Class")))
+
+```
+
+
+**Mis-classification Error** for 0-1 loss for training dataset:
+
+```{r, echo=FALSE}
+
+iris.bagging.me = 1 - sum(iris.bagging$class == iris.train$Species) / length(iris.train$Species)
+
+print(iris.bagging.me)
+
+```
+
+## Bagging on Iris Dataset (contd.)
+
+```{r, echo=FALSE}
+
+iris.bagging.predict <- predict.bagging(iris.bagging,
+                                        newdata = iris.test)
+
+
+```
+
+**Confusion Matrix** for testing dataset:
+
+```{r, echo=FALSE}
+
+print(iris.bagging.predict$confusion)
+
+```
+
+**Mis-classification Error** using 0-1 loss for testing dataset:
+
+```{r, echo=FALSE}
+
+print(iris.bagging.predict$error)
+
+```
+
+## Margins for Bagging on Iris Dataset
+
+```{r, echo=FALSE}
+
+iris.bagging.margins <- margins(iris.bagging, iris.train)
+iris.bagging.margins.predict <- margins(iris.bagging.predict, iris.train)
+margins.train <- iris.bagging.margins$margins
+margins.test <- iris.bagging.margins.predict$margins
+
+```
+
+```{r, echo=FALSE}
+
+plot(sort(margins.train),
+     1:length(margins.train)/length(margins.train),
+     type = "l",
+     xlim = c(-1, 1),
+     main = "Margin Cumulative Distribution Graph",
+     xlab = "m",
+     ylab = "% Observations",
+     col = "blue3",
+     lwd = 2)
+
+abline(v = 0,
+       col = "red",
+       lty = 2,
+       lwd = 2)
+
+lines(sort(margins.test),
+      1:length(margins.test)/length(margins.test),
+      type = "l",
+      cex = 0.5,
+      col = "green",
+      lwd = "2")
+
+legend("topleft",
+       c("test", "train"),
+       col = c("green", "blue"),
+       lty = 1,
+       lwd = 2)
+
+```
+
+
+## `errorevol` for Boosting on Iris Dataset
+
+
+```{r, echo=FALSE}
+
+evol.test <- errorevol(iris.adaboost, 
+                       iris.test)
+evol.train <- errorevol(iris.adaboost, iris.train)
+
+plot(evol.test$error, 
+     type = "l", 
+     ylim = c(0, 1),
+     main = "Boosting error vs Number of Trees", 
+     xlab = "Iterations", 
+     ylab = "Error", 
+     col = "red", 
+     lwd = 2)
+
+lines(evol.train$error, 
+      cex = .5, 
+      col = "blue", 
+      lty = 2, 
+      lwd = 2)
+
+legend("topleft", 
+       c("test", "train"), 
+       col = c("red", "blue"), 
+       lty = 1:2, 
+       lwd = 2)
+
+```
+
+
